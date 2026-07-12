@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Code Relay · 邮箱验证码聚合台</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <main class="app-shell">
+    <header class="masthead">
+      <div class="brand-lockup">
+        <div class="signal-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div>
+          <p class="eyebrow" data-i18n="brandEyebrow">LOCAL SIGNAL CONSOLE · 本地运行</p>
+          <h1>CODE <span>RELAY</span></h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="live-indicator" id="liveIndicator"><b></b><span data-i18n="liveConnecting">实时通道连接中</span></div>
+        <button class="button button-ghost language-toggle" id="languageToggle" type="button" aria-label="Switch language">EN</button>
+        <button class="button button-ghost" id="autoAllButton" type="button">开启全部自动</button>
+        <button class="button button-ghost" id="refreshAllButton" type="button" data-i18n="refreshAll">手动刷新全部</button>
+        <button class="button button-ghost" id="openGithubButton" type="button" data-i18n="connectGithub">连接 GitHub</button>
+        <button class="button button-primary" id="openImportButton" type="button"><span aria-hidden="true">＋</span> <span data-i18n="bulkImport">批量导入</span></button>
+        <button class="button button-danger" id="shutdownButton" type="button" data-i18n="shutdown">关闭服务</button>
+      </div>
+    </header>
+
+    <section class="hero-grid" aria-label="运行概览" data-i18n-aria="heroAria">
+      <article class="hero-copy">
+        <p class="section-index">01 / INBOX NETWORK</p>
+        <h2 data-i18n-html="heroTitle">把散落的邮箱，<br><em>汇成一条验证码流。</em></h2>
+        <p data-i18n="heroLead">自动识别粘贴文本中的邮箱与取信网址；支持可重复接口实时轮询，单次查询来源由你手动触发。</p>
+      </article>
+      <div class="stats-panel">
+        <article><span data-i18n="statTotal">邮箱总数</span><strong id="totalStat">0</strong><small>MAILBOXES</small></article>
+        <article><span data-i18n="statActive">自动监听</span><strong id="activeStat">0</strong><small>MONITORING</small></article>
+        <article class="accent"><span data-i18n="statCodes">已捕获验证码</span><strong id="codeStat">0</strong><small>CODE READY</small></article>
+        <article><span data-i18n="statErrors">异常来源</span><strong id="errorStat">0</strong><small>NEEDS REVIEW</small></article>
+      </div>
+    </section>
+
+    <section class="control-strip">
+      <div class="search-wrap">
+        <span aria-hidden="true">⌕</span>
+        <input id="searchInput" type="search" autocomplete="off" placeholder="搜索邮箱或来源地址…" aria-label="搜索邮箱" data-i18n-placeholder="searchPlaceholder" data-i18n-aria="searchAria">
+      </div>
+      <div class="filters" id="filters" aria-label="状态筛选" data-i18n-aria="filterAria">
+        <button class="filter active" type="button" data-filter="all"><span data-i18n="filterAll">全部</span> <span id="allCount">0</span></button>
+        <button class="filter" type="button" data-filter="code" data-i18n="filterCode">有验证码</button>
+        <button class="filter" type="button" data-filter="monitoring" data-i18n="filterMonitoring">监听中</button>
+        <button class="filter" type="button" data-filter="error" data-i18n="filterError">异常</button>
+      </div>
+      <p class="last-sync"><span data-i18n="lastSync">最后同步</span> <time id="serverTime">--:--:--</time></p>
+    </section>
+
+    <section class="mailbox-section">
+      <div class="section-heading">
+        <div>
+          <p class="section-index">02 / LIVE FEED</p>
+          <h2 data-i18n="mailboxHeading">邮箱信号</h2>
+        </div>
+        <p><span class="pulse-dot"></span> <span data-i18n="mailboxHint">页面通过本地实时通道自动更新</span></p>
+      </div>
+      <div class="mailbox-grid" id="mailboxGrid"></div>
+      <div class="empty-state" id="emptyState" hidden>
+        <div class="empty-glyph">@</div>
+        <h3 data-i18n="emptyTitle">等待第一组邮箱信号</h3>
+        <p data-i18n="emptyLead">粘贴购买信息、邮箱清单或“邮箱----网址”文本，我们会自动拆分并配对。</p>
+        <button class="button button-primary" id="emptyImportButton" type="button" data-i18n="startImport">开始批量导入</button>
+      </div>
+    </section>
+
+    <section class="github-section" aria-labelledby="githubHeading">
+      <div class="section-heading">
+        <div>
+          <p class="section-index">03 / GITHUB CONTROL</p>
+          <h2 id="githubHeading" data-i18n="githubHeading">自有 GitHub 账号</h2>
+        </div>
+        <p data-i18n="githubHint">逐账号人工授权 · 单目标确认操作 · 凭据保存在系统凭据库</p>
+      </div>
+      <div class="github-policy" id="githubPolicy">
+        <strong data-i18n="githubPolicyTitle">合规边界</strong>
+        <span data-i18n="githubPolicyText">不自动注册、不自动提交验证码、不批量或定时制造 star / watch / fork / follow。</span>
+      </div>
+      <div class="github-account-grid" id="githubAccountGrid"></div>
+      <div class="github-empty" id="githubEmpty">
+        <span>GH</span>
+        <div>
+          <h3 data-i18n="githubEmptyTitle">尚未连接账号</h3>
+          <p data-i18n="githubEmptyLead">先导入并选择一个邮箱，再通过 GitHub Device Flow 人工授权你的自有账号。</p>
+        </div>
+        <button class="button button-primary" id="emptyGithubButton" type="button" data-i18n="connectFirstGithub">连接第一个账号</button>
+      </div>
+    </section>
+
+    <section class="about-section" aria-labelledby="aboutHeading">
+      <div class="section-heading">
+        <div>
+          <p class="section-index">04 / ABOUT</p>
+          <h2 id="aboutHeading" data-i18n="aboutHeading">关于 Code Relay</h2>
+        </div>
+        <p data-i18n="aboutHint">本地运行 · MIT License · 作者信息已固定到发布元数据</p>
+      </div>
+      <div class="about-grid">
+        <article>
+          <span data-i18n="aboutAuthorLabel">作者</span>
+          <strong>HaoXiang Huang</strong>
+        </article>
+        <article>
+          <span data-i18n="aboutEmailLabel">邮箱</span>
+          <a href="mailto:didadida1688@gmail.com">didadida1688@gmail.com</a>
+        </article>
+        <article>
+          <span data-i18n="aboutHomepageLabel">主页</span>
+          <a href="https://nextweb4.github.io/" target="_blank" rel="noopener noreferrer">nextweb4.github.io</a>
+        </article>
+        <article>
+          <span>GitHub</span>
+          <a href="https://github.com/NextWeb4" target="_blank" rel="noopener noreferrer">github.com/NextWeb4</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="importDialog" class="import-dialog">
+    <form method="dialog" class="dialog-shell" id="importForm">
+      <header>
+        <div>
+          <p class="section-index">BATCH INGEST</p>
+          <h2 data-i18n="importTitle">批量导入邮箱</h2>
+        </div>
+        <button class="icon-button" value="cancel" aria-label="关闭" data-i18n-aria="close" type="submit">×</button>
+      </header>
+      <p class="dialog-lead" data-i18n="importLead">直接粘贴原始购买文本。系统会自动寻找所有邮箱与距离最近的 HTTP/HTTPS 取信地址。</p>
+      <label class="paste-field">
+        <span><span data-i18n="rawInput">原始文本</span> <b>RAW INPUT</b></span>
+        <textarea id="importText" rows="12" placeholder="示例：&#10;name@example.com----https://mail.example.com/api?token=...&#10;&#10;也支持网址在邮箱前面的长段落" data-i18n-placeholder="importPlaceholder"></textarea>
+      </label>
+      <div class="file-row">
+        <label class="file-picker"><span data-i18n="readFiles">读取 TXT / CSV 文件</span><input id="fileInput" type="file" accept=".txt,.csv,text/plain,text/csv" multiple></label>
+        <span id="fileMessage" data-i18n="fileMessage">可多选，内容会合并到上方</span>
+      </div>
+      <div class="format-note">
+        <strong data-i18n="formatRuleTitle">自动识别规则</strong>
+        <span data-i18n="formatRuleText">支持网址在邮箱之前或之后 · 自动去重 · token 仅保存在本机</span>
+      </div>
+      <p class="form-message" id="importMessage" role="status"></p>
+      <footer>
+        <button class="button button-ghost" value="cancel" type="submit" data-i18n="cancel">取消</button>
+        <button class="button button-primary" id="importButton" type="button"><span data-i18n="detectImport">识别并导入</span> <span aria-hidden="true">→</span></button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="githubConnectDialog" class="import-dialog github-dialog">
+    <div class="dialog-shell">
+      <header>
+        <div>
+          <p class="section-index">OWNED ACCOUNT AUTH</p>
+          <h2 data-i18n="githubConnectTitle">连接 GitHub 账号</h2>
+        </div>
+        <button class="icon-button" id="closeGithubConnect" aria-label="关闭" data-i18n-aria="close" type="button">×</button>
+      </header>
+      <p class="dialog-lead" data-i18n="githubConnectLead">首次使用先填 OAuth Client ID，再选择用于人工收取 GitHub 邮件的邮箱。授权过程不会创建账号，也不会自动填写验证码。</p>
+      <label class="github-field">
+        <span>OAuth Client ID <a href="https://github.com/settings/applications/new" target="_blank" rel="noopener noreferrer" data-i18n="createOauthApp">去 GitHub 创建 OAuth App →</a></span>
+        <input id="githubClientIdInput" type="text" autocomplete="off" spellcheck="false" placeholder="粘贴 GitHub OAuth App 的 Client ID" data-i18n-placeholder="clientIdPlaceholder">
+        <small data-i18n="clientIdHelp">创建后请在 OAuth App 设置中启用 Device Flow。Client ID 不是密码，将仅保存在本机数据文件。</small>
+      </label>
+      <label class="github-field">
+        <span data-i18n="linkedMailbox">关联邮箱</span>
+        <select id="githubMailboxSelect"></select>
+      </label>
+      <div class="device-panel" id="devicePanel" hidden>
+        <span>DEVICE CODE</span>
+        <strong id="githubDeviceCode">----</strong>
+        <a id="githubVerifyLink" href="https://github.com/login/device" target="_blank" rel="noopener noreferrer" data-i18n="openGithubVerify">打开 GitHub 授权页面 →</a>
+        <p id="githubAuthStatus" data-i18n="waitingGithubConfirm">等待你在 GitHub 页面确认…</p>
+      </div>
+      <p class="form-message" id="githubConnectMessage" role="status"></p>
+      <footer>
+        <button class="button button-ghost" id="cancelGithubConnect" type="button" data-i18n="cancel">取消</button>
+        <button class="button button-primary" id="startGithubConnect" type="button" data-i18n="generateDeviceCode">生成授权码</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog id="githubActionDialog" class="import-dialog github-dialog">
+    <div class="dialog-shell">
+      <header>
+        <div>
+          <p class="section-index">CONFIRMED SINGLE ACTION</p>
+          <h2 id="githubActionTitle">GitHub 操作</h2>
+        </div>
+        <button class="icon-button" id="closeGithubAction" aria-label="关闭" data-i18n-aria="close" type="button">×</button>
+      </header>
+      <p class="dialog-lead" id="githubActionLead"></p>
+      <label class="github-field">
+        <span id="githubTargetLabel">目标</span>
+        <input id="githubTargetInput" type="text" autocomplete="off" spellcheck="false" placeholder="owner/repo">
+      </label>
+      <div class="github-warning" data-i18n="githubWarning">每次只执行一个目标。提交即表示你确认这是自有账号的真实、非批量操作。</div>
+      <p class="form-message" id="githubActionMessage" role="status"></p>
+      <footer>
+        <button class="button button-ghost" id="cancelGithubAction" type="button" data-i18n="cancel">取消</button>
+        <button class="button button-primary" id="submitGithubAction" type="button" data-i18n="confirmRun">确认执行</button>
+      </footer>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <section class="shutdown-screen" id="shutdownScreen" hidden>
+    <div class="shutdown-mark">■</div>
+    <p class="section-index">SERVICE OFFLINE</p>
+    <h2 data-i18n="shutdownTitle">服务已安全关闭</h2>
+    <p data-i18n="shutdownLead">自动取信和本地接口均已停止。关闭此页面即可；再次使用时双击“启动软件.cmd”。</p>
+  </section>
+  <script src="/app.js" defer></script>
+</body>
+</html>
