@@ -1,63 +1,53 @@
+[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
+
 # Code Relay
 
-Code Relay is a local mailbox verification-code console. It imports mailbox and retrieval URL pairs, polls supported retrieval endpoints from `127.0.0.1`, extracts verification codes, and helps you manually manage owned GitHub accounts through GitHub Device Flow.
+A local mailbox verification-code console with guarded retrieval polling and manual workflows for GitHub accounts you own.
 
-Code Relay 是一个本地邮箱验证码聚合台。它可以导入“邮箱 + 取信网址”，在本机 `127.0.0.1` 上轮询支持的取信接口，提取验证码，并通过 GitHub Device Flow 辅助管理你自己的 GitHub 账号。
+![Last commit](https://img.shields.io/github/last-commit/NextWeb4/code-relay?style=flat-square)
+![Repository size](https://img.shields.io/github/repo-size/NextWeb4/code-relay?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/NextWeb4/code-relay?style=flat-square)
+![Node.js 20 or newer](https://img.shields.io/badge/Node.js-20%2B-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![MIT License](https://img.shields.io/github/license/NextWeb4/code-relay?style=flat-square)
 
-![Code Relay dashboard](docs/demo/code-relay-dashboard.png)
-![Code Relay GitHub panel](docs/demo/code-relay-github.png)
+![Code Relay mailbox dashboard](docs/demo/code-relay-dashboard.png)
 
-## Features / 功能特点
+![Code Relay owned GitHub accounts panel](docs/demo/code-relay-github.png)
 
-- Import raw purchase text, TXT, or CSV files and pair mailboxes with HTTP/HTTPS retrieval URLs.
-- Poll repeatable sources, protect one-shot sources, and update the dashboard through local SSE.
-- Extract verification codes from plain text, HTML, JSON-like mail payloads, and `iframe[srcdoc]` mail bodies.
-- Reject common false positives such as dates, time zones, email local parts, and GitHub button text.
-- Keep full mailbox data, source URLs, tokens, and codes only in local runtime storage.
-- Connect owned GitHub accounts with Device Flow; OAuth tokens are stored in the operating system credential vault, not JSON files.
-- Execute only confirmed single-target GitHub actions: `star`, `watch`, `fork`, and `follow`.
-- Switch the UI between Chinese and English; the language preference is saved in `localStorage`.
+## What It Does
 
-- 支持粘贴原始购买文本，或导入 TXT / CSV 文件，自动配对邮箱与 HTTP/HTTPS 取信网址。
-- 支持可重复来源轮询、单次来源保护，并通过本地 SSE 实时刷新页面。
-- 支持从纯文本、HTML、类 JSON 邮件内容和 `iframe[srcdoc]` 正文中提取验证码。
-- 避免把日期、时区、邮箱账号片段、GitHub 按钮文案等误判成验证码。
-- 完整邮箱、取信 URL、token 和验证码仅保存在本机运行时数据中。
-- 使用 GitHub Device Flow 连接自有账号；OAuth token 写入操作系统凭据库，不写入 JSON。
-- GitHub 写操作只支持确认后的单目标 `star`、`watch`、`fork`、`follow`。
-- 页面支持中文/英文切换，语言偏好保存到 `localStorage`。
+Code Relay runs a local service on `127.0.0.1:4173`. It imports mailbox/retrieval-URL pairs from pasted purchase text, TXT, or CSV; polls supported HTTP/HTTPS sources; extracts likely verification codes; and streams state changes to the browser with Server-Sent Events.
 
-## Requirements / 环境要求
+- Pairs and deduplicates mailbox addresses with retrieval URLs, including same-line `mailbox----url` and supported split-line formats.
+- Handles repeatable polling sources and guarded one-shot sources.
+- Extracts codes from plain text, HTML, JSON-like payloads, and `iframe[srcdoc]` message bodies.
+- Rejects common false positives such as dates, time-zone offsets, email local parts, and unrelated button text.
+- Keeps mailbox state, source URLs, messages, and codes in local runtime storage.
+- Offers Chinese and English UI text with the preference stored in `localStorage`.
+- Connects an owned GitHub account through OAuth Device Flow and stores its token in the operating-system credential vault.
+- Allows only confirmed, single-target GitHub `star`, `watch`, `fork`, and `follow` actions.
+
+Code Relay does not register GitHub accounts, submit verification codes, bypass CAPTCHA or risk controls, or run bulk/scheduled GitHub interactions.
+
+## Requirements
 
 - Node.js 20 or newer.
-- npm.
-- Windows is the primary packaged target for v1.0.0.
+- npm (the repository includes `package-lock.json`).
+- Windows for the packaged `v1.0.0` executable and portable ZIP.
+- A GitHub OAuth Client ID only when using the optional GitHub module. It can be entered in the UI or supplied through `GITHUB_OAUTH_CLIENT_ID`; mail retrieval works without it.
 
-- Node.js 20 或更高版本。
-- npm。
-- v1.0.0 的主要打包目标是 Windows。
-
-## Installation / 安装方法
+## Install and Run
 
 ```powershell
 npm install
-```
-
-Optional environment variables can be copied from `.env.example`. The app does not require a `.env` loader; set variables in your shell before running if needed.
-
-可参考 `.env.example` 设置可选环境变量。本项目默认不加载 `.env` 文件，如需配置请在启动前写入当前 shell 环境。
-
-## Usage / 使用方法
-
-```powershell
 npm start
 ```
 
-Then open <http://127.0.0.1:4173>. Windows users can also double-click `启动软件.cmd`, which starts the service and opens the browser.
+Open <http://127.0.0.1:4173>. On Windows, `启动软件.cmd` starts the service and opens the browser.
 
-启动后访问 <http://127.0.0.1:4173>。Windows 用户也可以双击 `启动软件.cmd`，它会启动服务并打开浏览器。
+`.env.example` documents optional environment values, but the application does not load `.env` automatically. Set values in the current shell before starting.
 
-Supported import examples:
+Example imports:
 
 ```text
 name@example.com----https://mail.example.com/api?token=YOUR_TOKEN
@@ -67,56 +57,70 @@ qq mailbox:
 1234567890@qq.com
 ```
 
-## Packaging / 打包说明
+Same-line mailbox/URL pairs stay on that line. Cross-line matching is used only when the mailbox line has no URL, so one record cannot steal the next record's source.
 
-Build Windows release assets:
+## Test
+
+```powershell
+npm test
+```
+
+Tests use Node's built-in test runner and cover import pairing, mailbox isolation, code extraction, provider parsing, polling, storage, HTTP routes, GitHub request guards, credential redaction, global refresh controls, and stale-code cleanup. Tests must not call real retrieval or GitHub APIs.
+
+No lint or format command is currently declared.
+
+## Package a Windows Release
 
 ```powershell
 npm run package
 npm run sha256
 ```
 
-Generated files are written to `release-assets/`:
+The project has no frontend compilation step. Packaging uses `@yao-pkg/pkg` for the Windows x64 executable, `resedit` for version-resource metadata, and PowerShell `Compress-Archive` through the packaging script for the portable ZIP.
 
-- `code-relay-v1.0.0-win-x64.exe`: Windows x64 executable.
-- `code-relay-v1.0.0-windows-portable.zip`: portable zip containing the executable, README, license, and demo images.
-- `SHA256SUMS.txt`: SHA256 checksums for release assets.
+Expected files in `release-assets/`:
 
-This project has no frontend build step. Packaging uses `@yao-pkg/pkg` for the Windows executable and PowerShell `Compress-Archive` for the portable zip.
+| File | Purpose |
+| --- | --- |
+| `code-relay-v1.0.0-win-x64.exe` | Windows x64 executable |
+| `code-relay-v1.0.0-windows-portable.zip` | EXE, README, LICENSE, `.env.example`, and verified demo images |
+| `SHA256SUMS.txt` | SHA256 checksums for release files |
 
-本项目没有前端编译步骤。Windows exe 使用 `@yao-pkg/pkg` 打包，便携 zip 使用 PowerShell `Compress-Archive` 生成。
+No MSI is produced because this local Node web application has no installer project. Publishing instructions are in `PUBLISHING.md`; the API script pushes `main` and tag `v1.0.0` to `NextWeb4/code-relay` and reads `GITHUB_TOKEN` or `GH_TOKEN` at runtime without writing it into Git configuration.
 
-## Test / 测试
+## Project Structure
 
-```powershell
-npm test
-```
+| Path | Responsibility |
+| --- | --- |
+| `src/server.js` | Local HTTP/API/SSE server and shutdown orchestration |
+| `src/parser.js` | Pure mailbox/URL import parsing |
+| `src/code-extractor.js` | Verification-code and message extraction |
+| `src/providers/` | Guarded retrieval protocols and response parsing |
+| `src/network-guard.js` | URL/network restrictions for outbound retrieval |
+| `src/poller.js` | Poll scheduling, concurrency, and one-shot handling |
+| `src/store.js` | Local JSON persistence |
+| `src/github/` | Device Flow, credential vault, GitHub REST client, and single-account service orchestration |
+| `public/` | Native HTML/CSS/JavaScript browser UI; third-party requests go through local `/api` routes |
+| `tests/` | Node built-in test suites |
+| `scripts/` | Windows packaging, metadata, checksums, UI verification, and release publishing |
 
-The automated tests cover import pairing, mailbox isolation, code extraction, provider parsing, GitHub API guards, token redaction, global refresh controls, and legacy false-code cleanup.
+## Data and Security
 
-自动化测试覆盖导入配对、邮箱隔离、验证码提取、取信来源解析、GitHub API 防护、token 脱敏、全局刷新控制和历史误码清理。
+- Source runs store runtime state in `data/mailboxes.json`; packaged runs use the user's local application-data directory.
+- `data/*.json`, `.env`, credentials, logs, build outputs, and caches are excluded from Git.
+- OAuth tokens are stored only through `@napi-rs/keyring`; there is no plaintext-file fallback when the system vault is unavailable.
+- Retrieval requests reject unsafe destinations and redirects, time out, limit response bodies to 2 MB, and redact token-like query values in displayed URLs.
+- Polling defaults and guards prevent unbounded concurrency; do not reduce the interval below five seconds.
+- GitHub writes are serialized, require a single explicit target and confirmation, wait at least one second between writes, and stop for primary, secondary, or `Retry-After` limits.
+- Full mailbox addresses, source URLs, codes, and mail content are sensitive local data. Do not include them in logs, screenshots, test snapshots, or commits.
 
-## Data And Security / 数据与安全
+## Author
 
-- Runtime data is stored in `data/mailboxes.json` during source runs and in the user's local app data directory when running the packaged exe.
-- `data/*.json`, `.env`, tokens, credentials, logs, build outputs, and caches are excluded from Git.
-- The server listens on `127.0.0.1` by default.
-- External retrieval requests have timeout, size, and concurrency limits.
-- The software does not register GitHub accounts, submit verification codes, bypass CAPTCHA, or run bulk scheduled GitHub interactions.
-
-- 源码运行时数据写入 `data/mailboxes.json`；exe 打包版本写入用户本机应用数据目录。
-- `data/*.json`、`.env`、token、credentials、日志、构建产物和缓存均被排除在 Git 外。
-- 服务默认只监听 `127.0.0.1`。
-- 外部取信请求带有超时、响应大小和并发限制。
-- 本软件不会注册 GitHub 账号、自动提交验证码、绕过 CAPTCHA，也不提供批量或定时 GitHub 互动。
-
-## Author / 作者信息
-
-- Author / 作者：HaoXiang Huang
-- Email / 邮箱：didadida1688@gmail.com
-- Homepage / 主页：https://nextweb4.github.io/
-- GitHub：https://github.com/NextWeb4
+- HaoXiang Huang
+- [didadida1688@gmail.com](mailto:didadida1688@gmail.com)
+- <https://nextweb4.github.io/>
+- <https://github.com/NextWeb4>
 
 ## License
 
-MIT License. See [LICENSE](LICENSE).
+[MIT](LICENSE) © 2026 HaoXiang Huang.
