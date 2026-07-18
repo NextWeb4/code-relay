@@ -28,7 +28,8 @@
 - Publishing scripts may read `GITHUB_TOKEN` or `GH_TOKEN` at runtime, but must not persist credentials in files, logs, remotes, or Git configuration.
 
 ## 5. Code style
-
+- Keep the opening centered language badge row byte-for-byte identical across `README.md`, `README.zh-CN.md`, and `README.ja.md`; preserve the Shields URLs and native labels `English`, `简体中文`, and `日本語`.
+- Keep the three README documents in the same section order with matching commands, paths, versions, links, images, numeric facts, and code fences; translate prose and headings naturally.
 - Server modules use CommonJS, 2-space indentation, semicolons, and single quotes; browser code uses native JavaScript modules and no framework build.
 - Keep parsing and code extraction pure. Separate network requests, persistence, and scheduling from transformations.
 - No lint/format command was found in the current repository; record and document one before treating it as a required gate.
@@ -62,7 +63,8 @@
 - README and security notes reflect any dependency, provider, storage, network, or packaging change.
 
 ## 9. Review criteria
-
+- Confirm the three opening language badge rows are identical and render the labels inside SVG images rather than browser-translatable text.
+- Compare all three README versions for matching facts, section order, commands, paths, links, images, numbers, and code fences.
 - Check record pairing, deduplication, recipient isolation, stale-code removal, one-shot consumption, and false-positive filtering.
 - Check every outbound request for safe scheme/host resolution, redirect behavior, timeout, size limit, concurrency, and error isolation.
 - Check UI, errors, logs, JSON state, and snapshots for mailbox, URL, token, and message leakage.

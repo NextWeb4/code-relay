@@ -1,4 +1,8 @@
-[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/English-0969da?style=flat-square" alt="English"></a>
+  <a href="README.zh-CN.md"><img src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-c8102e?style=flat-square" alt="简体中文"></a>
+  <a href="README.ja.md"><img src="https://img.shields.io/badge/%E6%97%A5%E6%9C%AC%E8%AA%9E-8250df?style=flat-square" alt="日本語"></a>
+</p>
 
 # Code Relay
 
@@ -113,6 +117,13 @@ npm run sha256
 - 轮询默认值和防护限制无界并发；轮询间隔不得低于 5 秒。
 - GitHub 写请求必须串行、单目标、明确确认，操作间隔至少 1 秒；遇到主限流、次级限流或 `Retry-After` 时必须停止并等待。
 - 完整邮箱、来源 URL、验证码和邮件内容都是本地敏感数据，不应进入日志、截图、测试快照或提交。
+
+## 维护与贡献
+
+- 修改 Parser、Provider、轮询、存储、GitHub 或浏览器边界前，请先阅读[架构说明](docs/architecture.md)，并在对应的 `tests/*.test.js` 中增加针对性覆盖。
+- 浏览器端修改必须保留无需构建的原生前端，并同步维护中英文应用文案；文档修改必须保持三份 README 一致。
+- 发布工作应遵循[发布审计](docs/release-audit.md)和[发布指南](PUBLISHING.md)，随后校验 EXE、便携包、演示图与校验值，且不得提交生成产物。
+- 取信与 GitHub 操作必须保持手动、单一用途、感知限流，并遵守上文的安全边界。
 
 ## 作者
 

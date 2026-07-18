@@ -1,4 +1,8 @@
-[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/English-0969da?style=flat-square" alt="English"></a>
+  <a href="README.zh-CN.md"><img src="https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-c8102e?style=flat-square" alt="简体中文"></a>
+  <a href="README.ja.md"><img src="https://img.shields.io/badge/%E6%97%A5%E6%9C%AC%E8%AA%9E-8250df?style=flat-square" alt="日本語"></a>
+</p>
 
 # Code Relay
 
@@ -113,6 +117,13 @@ No MSI is produced because this local Node web application has no installer proj
 - Polling defaults and guards prevent unbounded concurrency; do not reduce the interval below five seconds.
 - GitHub writes are serialized, require a single explicit target and confirmation, wait at least one second between writes, and stop for primary, secondary, or `Retry-After` limits.
 - Full mailbox addresses, source URLs, codes, and mail content are sensitive local data. Do not include them in logs, screenshots, test snapshots, or commits.
+
+## Maintenance and Contributions
+
+- Read the [architecture guide](docs/architecture.md) before changing parser, provider, polling, storage, GitHub, or browser boundaries; add focused coverage in the corresponding `tests/*.test.js` suite.
+- Browser changes must preserve the native no-build frontend and keep the Chinese/English application strings aligned. Documentation changes must keep the three README versions aligned.
+- Release work must follow [the release audit](docs/release-audit.md) and [publishing guide](PUBLISHING.md), then verify the EXE, portable archive, demo images, and checksums without committing generated assets.
+- Keep retrieval and GitHub operations manual, single-purpose, rate-limit aware, and inside the safety limits documented above.
 
 ## Author
 
