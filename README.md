@@ -63,6 +63,24 @@ qq mailbox:
 
 Same-line mailbox/URL pairs stay on that line. Cross-line matching is used only when the mailbox line has no URL, so one record cannot steal the next record's source.
 
+## Runtime Configuration
+
+- `PORT` changes the local listener port; the normal service still binds to the loopback interface.
+- `DATA_FILE` overrides the JSON state path. Protect that file because it contains mailbox addresses, retrieval URLs, messages, and extracted codes.
+- `GITHUB_OAUTH_CLIENT_ID` supplies the optional OAuth application identifier without saving it through the UI.
+- `CODE_RELAY_OPEN_BROWSER` controls whether startup opens the local page automatically.
+
+These variables must be set in the current process environment before launch. `.env.example` documents them, but Code Relay does not include a dotenv loader.
+
+## Daily Workflow
+
+1. Start the service and open the local dashboard.
+2. Use **Batch Import** to paste purchase text or load a supported TXT/CSV source, then check the added, updated, duplicate, and rejected counts.
+3. Search or filter the mailbox cards and confirm whether each source is repeatable or one-shot. A one-shot source must remain a deliberate manual fetch.
+4. Refresh one mailbox, refresh all, or enable automatic polling only for eligible repeatable sources. Server-Sent Events update the dashboard after local state changes.
+5. Confirm the mailbox and message context before copying a code. Delete a mailbox record when its local data is no longer needed.
+6. For the optional GitHub flow, select a linked mailbox, authorize an owned account through Device Flow, run one confirmed action against one target, and disconnect the account to remove its vault token.
+
 ## Test
 
 ```powershell

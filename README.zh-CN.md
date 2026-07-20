@@ -63,13 +63,31 @@ qq mailbox:
 
 同一行中的邮箱和 URL 必须在该行内配对。只有邮箱所在行没有 URL 时才使用跨行匹配，避免一条记录抢走下一条记录的来源。
 
+## 运行配置
+
+- `PORT` 修改本地监听端口；常规服务仍只绑定回环接口。
+- `DATA_FILE` 覆盖 JSON 状态文件路径。该文件包含邮箱、取信 URL、消息和提取出的验证码，必须妥善保护。
+- `GITHUB_OAUTH_CLIENT_ID` 可直接提供可选 OAuth 应用标识，无需通过 UI 保存。
+- `CODE_RELAY_OPEN_BROWSER` 控制启动时是否自动打开本地页面。
+
+这些变量必须在启动前写入当前进程环境。`.env.example` 记录了变量，但 Code Relay 没有引入 dotenv 加载器。
+
+## 日常工作流
+
+1. 启动服务并打开本地控制台。
+2. 使用“批量导入”粘贴购买文本或载入支持的 TXT/CSV 来源，然后核对新增、更新、重复和拒绝数量。
+3. 搜索或筛选邮箱卡片，并确认每个来源是可重复取信还是一次性取信；一次性来源必须保持为人工触发。
+4. 可以刷新单个邮箱、刷新全部邮箱，或仅为符合条件的可重复来源启用自动轮询。Server-Sent Events 会在本地状态变化后更新页面。
+5. 复制验证码前确认邮箱和消息上下文；不再需要本地数据时删除对应邮箱记录。
+6. 可选 GitHub 流程中，先选择关联邮箱，通过 Device Flow 授权自有账号，再对单个目标执行一次明确确认的操作；断开账号会删除凭据库中的 Token。
+
 ## 测试
 
 ```powershell
 npm test
 ```
 
-测试使用 Node 内置测试运行器，覆盖导入配对、邮箱隔离、验证码提取、Provider 解析、轮询、存储、HTTP 路由、GitHub 请求防护、凭据脱敏、全局刷新控制和历史误码清理。测试不得访问真实取信或 GitHub API。
+测试使用 Node 内置测试运行器，覆盖导入配对、邮箱隔离、验证码提取、提供方解析、轮询、存储、HTTP 路由、GitHub 请求防护、凭据脱敏、全局刷新控制和历史误码清理。测试不得访问真实取信或 GitHub API。
 
 当前没有配置 lint 或 format 命令。
 
@@ -99,11 +117,11 @@ npm run sha256
 | `src/server.js` | 本地 HTTP/API/SSE 服务和关闭编排 |
 | `src/parser.js` | 纯函数形式的邮箱/URL 导入解析 |
 | `src/code-extractor.js` | 验证码与邮件消息提取 |
-| `src/providers/` | 受保护的取信协议与响应解析 |
+| `src/providers/` | 带安全限制的取信协议与响应解析 |
 | `src/network-guard.js` | 外部取信 URL/网络限制 |
 | `src/poller.js` | 轮询调度、并发和一次性来源处理 |
 | `src/store.js` | 本地 JSON 持久化 |
-| `src/github/` | Device Flow、凭据库、GitHub REST Client 和单账号服务编排 |
+| `src/github/` | Device Flow、凭据库、GitHub REST 客户端和单账号服务编排 |
 | `public/` | 原生 HTML/CSS/JavaScript 页面；第三方请求必须经过本地 `/api` |
 | `tests/` | Node 内置测试套件 |
 | `scripts/` | Windows 打包、元数据、校验值、UI 验证和 Release 发布 |
@@ -120,7 +138,7 @@ npm run sha256
 
 ## 维护与贡献
 
-- 修改 Parser、Provider、轮询、存储、GitHub 或浏览器边界前，请先阅读[架构说明](docs/architecture.md)，并在对应的 `tests/*.test.js` 中增加针对性覆盖。
+- 修改解析器、取信提供方、轮询、存储、GitHub 或浏览器边界前，请先阅读[架构说明](docs/architecture.md)，并在对应的 `tests/*.test.js` 中增加针对性覆盖。
 - 浏览器端修改必须保留无需构建的原生前端，并同步维护中英文应用文案；文档修改必须保持三份 README 一致。
 - 发布工作应遵循[发布审计](docs/release-audit.md)和[发布指南](PUBLISHING.md)，随后校验 EXE、便携包、演示图与校验值，且不得提交生成产物。
 - 取信与 GitHub 操作必须保持手动、单一用途、感知限流，并遵守上文的安全边界。
