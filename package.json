@@ -1,3 +1,6 @@
+
+
+
 {
   "name": "code-relay",
   "version": "1.0.0",
@@ -6,7 +9,7 @@
   "bin": "src/server.js",
   "author": {
     "name": "HaoXiang Huang",
-    "email": "didadida1688@gmail.com",
+    "email": "Rays688888@Gmail.com",
     "url": "https://nextweb4.github.io/"
   },
   "license": "MIT",

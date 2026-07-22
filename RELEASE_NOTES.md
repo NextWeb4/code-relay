@@ -1,3 +1,6 @@
+
+
+
 # Initial Clean Release v1.0.0
 
 ## English
@@ -21,7 +24,7 @@ No MSI is included in v1.0.0 because this is a local Node web app without a Wind
 ### Author
 
 - HaoXiang Huang
-- didadida1688@gmail.com
+- Rays688888@Gmail.com
 - https://nextweb4.github.io/
 - https://github.com/NextWeb4
 
@@ -50,7 +53,7 @@ v1.0.0 不包含 MSI，因为当前项目是本地 Node Web 应用，没有 Wind
 ### 作者信息
 
 - HaoXiang Huang
-- didadida1688@gmail.com
+- Rays688888@Gmail.com
 - https://nextweb4.github.io/
 - https://github.com/NextWeb4
 
